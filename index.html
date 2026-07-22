@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIASAT - Sistem Informasi Samsat Aset</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        /* --- Halaman Login --- */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+        }
+        .login-card {
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-card h2 {
+            margin: 0;
+            color: #2980b9;
+            font-size: 32px;
+        }
+        .login-card h4 {
+            margin: 5px 0 25px 0;
+            color: #7f8c8d;
+            font-weight: normal;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .login-card .btn-submit {
+            width: 100%;
+            font-size: 16px;
+        }
+        .error-msg {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* --- Halaman Dashboard --- */
+        #dashboard-section {
+            display: none; 
+            padding: 20px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .header-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .header-title h2 { margin-bottom: 5px; color: #2980b9; }
+        .header-title p { margin-top: 0; color: #7f8c8d; font-weight: bold; }
+        
+        /* Form Styling */
+        .form-container {
+            background-color: #eaf2f8;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border: 1px solid #d4e6f1;
+        }
+        .form-container h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .form-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .btn-submit {
+            background-color: #2980b9;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-submit:hover {
+            background-color: #1f6391;
+        }
+        .btn-logout {
+            background-color: #e74c3c;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            float: right;
+            margin-top: -45px;
+        }
+        .btn-logout:hover { background-color: #c0392b; }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: 0.3s;
+        }
+        .tab-btn:hover { color: #2980b9; }
+        .tab-btn.active {
+            color: #2980b9;
+            border-bottom: 3px solid #2980b9;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #2980b9;
+            color: white;
+            font-weight: normal;
+        }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
+
+        /* Status & Action Buttons */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            display: inline-block;
+        }
+        .status-aman { background-color: #27ae60; }        
+        .status-mendekati { background-color: #f39c12; }   
+        .status-kadaluarsa { background-color: #e74c3c; }  
+
+        .btn-edit {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .btn-edit:hover { background-color: #d68910; }
+
+        /* Modal (Pop-up) Styling */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 10; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .close-modal {
+            color: #aaa;
+            float: right;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover { color: black; }
+    </style>
+</head>
+<body>
+
+    <!-- HALAMAN LOGIN -->
+    <div id="login-section" class="login-wrapper">
+        <div class="login-card">
+            <h2>SIASAT</h2>
+            <h4>Sistem Informasi Samsat Aset</h4>
+            <form id="formLogin">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit" class="btn-submit">Masuk</button>
+                <div id="loginError" class="error-msg">Username atau Password salah!</div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HALAMAN DASHBOARD UTAMA -->
+    <div id="dashboard-section">
+        <div class="container">
+            
+            <div class="header-title">
+                <h2>SIASAT</h2>
+                <p>Sistem Informasi Samsat Aset (<span id="roleBadge" style="color: #e67e22;"></span>)</p>
+                <button class="btn-logout" onclick="logout()">Keluar</button>
+            </div>
+
+            <!-- Form Tambah Data Baru (Hanya untuk Admin) -->
+            <div id="adminFormContainer" class="form-container">
+                <h3>+ Tambah Data Kendaraan</h3>
+                <form id="formTambahData">
+                    <div class="form-group">
+                        <select id="inputKategori" required>
+                            <option value="" disabled selected>-- Pilih Kategori --</option>
+                            <option value="Motor">Motor</option>
+                            <option value="Mobil">Mobil</option>
+                        </select>
+                        <input type="text" id="inputMerek" placeholder="Nama Merek (Contoh: Honda Vario)" required>
+                        <input type="text" id="inputPlat" placeholder="Nomor Plat (Contoh: DK 1234 AB)" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="date" id="inputTanggal" required title="Tanggal Kadaluarsa">
+                        <input type="text" id="inputPembawa" placeholder="Nama Yang Membawa" required>
+                        <input type="text" id="inputKeadaan" placeholder="Keadaan Kendaraan (Cth: Baik/Rusak)" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Simpan Data</button>
+                </form>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="tabs">
+                <button class="tab-btn active" id="btn-Motor" onclick="openTab(event, 'Motor')">Kategori Motor</button>
+                <button class="tab-btn" id="btn-Mobil" onclick="openTab(event, 'Mobil')">Kategori Mobil</button>
+            </div>
+
+            <!-- Tabel Kategori Motor -->
+            <div id="Motor" class="tab-content active">
+                <table id="tabelMotor">
+                    <thead>
+                        <tr>
+                            <th>Nama Merek</th>
+                            <th>Nomor Plat</th>
+                            <th>Tanggal Kadaluarsa</th>
+                            <th>Yang Membawa</th>
+                            <th>Keadaan</th>
+                            <th>Status</th>
+                            <th class="th-aksi">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="col-merek">Honda Vario 150</td>
+                            <td class="col-plat">DK 1234 AB</td>
+                            <td class="col-tanggal" data-rawdate="2026-08-25">25 Agustus 2026</td>
+                            <td class="col-pembawa">Budi Santoso</td>
+                            <td class="col-keadaan">Baik</td>
+                            <td class="col-status"><span class="badge status-aman">Aman</span></td>
+                            <td class="td-aksi"><button class="btn-edit" onclick="bukaModalEdit(this)">Edit</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tabel Kategori Mobil -->
+            <div id="Mobil" class="tab-content">
+                <table id="tabelMobil">
+                    <thead>
+                        <tr>
+                            <th>Nama Merek</th>
+                            <th>Nomor Plat</th>
+                            <th>Tanggal Kadaluarsa</th>
+                            <th>Yang Membawa</th>
+                            <th>Keadaan</th>
+                            <th>Status</th>
+                            <th class="th-aksi">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="col-merek">Toyota Avanza</td>
+                            <td class="col-plat">DK 1122 XYZ</td>
+                            <td class="col-tanggal" data-rawdate="2026-10-30">30 Oktober 2026</td>
+                            <td class="col-pembawa">Agus Pratama</td>
+                            <td class="col-keadaan">Lecet Body Kiri</td>
+                            <td class="col-status"><span class="badge status-aman">Aman</span></td>
+                            <td class="td-aksi"><button class="btn-edit" onclick="bukaModalEdit(this)">Edit</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pop-up untuk Edit Data (Hanya untuk Admin) -->
+    <div id="modalEdit" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="tutupModalEdit()">&times;</span>
+            <h3 style="margin-top: 0; color: #f39c12;">Edit Data Kendaraan</h3>
+            <form id="formEditData">
+                <div class="form-group" style="grid-template-columns: 1fr;">
+                    <label>Nomor Plat:</label>
+                    <input type="text" id="editPlat" required>
+                    
+                    <label>Tanggal Kadaluarsa:</label>
+                    <input type="date" id="editTanggal" required>
+                    
+                    <label>Yang Membawa:</label>
+                    <input type="text" id="editPembawa" required>
+
+                    <label>Keadaan Kendaraan:</label>
+                    <input type="text" id="editKeadaan" required>
+                </div>
+                <button type="submit" class="btn-submit" style="background-color: #f39c12; width: 100%;">Update Data</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let currentRole = "";
+
+        document.getElementById("formLogin").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const user = document.getElementById("username").value;
+            const pass = document.getElementById("password").value;
+            const errorMsg = document.getElementById("loginError");
+            const adminForm = document.getElementById("adminFormContainer");
+            const roleBadge = document.getElementById("roleBadge");
+
+            // Validasi Akun Admin
+            if (user === "pupr" && pass === "pupr") {
+                currentRole = "admin";
+                roleBadge.innerText = "Login sebagai: Admin";
+                adminForm.style.display = "block"; 
+                aturTampilanAksi(true); 
+            } 
+            // Validasi Akun Viewer/User Biasa
+            else if (user === "siasat" && pass === "siasat") {
+                currentRole = "viewer";
+                roleBadge.innerText = "Login sebagai: Viewer (Hanya Lihat)";
+                adminForm.style.display = "none"; 
+                aturTampilanAksi(false); 
+            } 
+            else {
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("dashboard-section").style.display = "block";
+            errorMsg.style.display = "none";
+            document.getElementById("formLogin").reset();
+        });
+
+        function aturTampilanAksi(tampilkan) {
+            const thAksi = document.querySelectorAll(".th-aksi");
+            const tdAksi = document.querySelectorAll(".td-aksi");
+            
+            thAksi.forEach(el => el.style.display = tampilkan ? "table-cell" : "none");
+            tdAksi.forEach(el => el.style.display = tampilkan ? "table-cell" : "none");
+        }
+
+        function logout() {
+            document.getElementById("dashboard-section").style.display = "none";
+            document.getElementById("login-section").style.display = "flex";
+            currentRole = "";
+        }
+
+        function openTab(evt, categoryName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            tablinks = document.getElementsByClassName("tab-btn");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            document.getElementById(categoryName).classList.add("active");
+            if(evt) {
+                evt.currentTarget.classList.add("active");
+            } else {
+                document.getElementById('btn-' + categoryName).classList.add("active");
+            }
+        }
+
+        function formatTanggal(tanggalString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            const date = new Date(tanggalString);
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        function hitungStatus(tanggalInput) {
+            const hariIni = new Date();
+            hariIni.setHours(0, 0, 0, 0); 
+            const tglKadaluarsa = new Date(tanggalInput);
+            tglKadaluarsa.setHours(0, 0, 0, 0);
+
+            const selisihWaktu = tglKadaluarsa.getTime() - hariIni.getTime();
+            const selisihHari = Math.ceil(selisihWaktu / (1000 * 3600 * 24));
+
+            if (selisihHari < 0) return { teks: "Kadaluarsa", kelas: "status-kadaluarsa" };
+            if (selisihHari <= 30) return { teks: "Mendekati", kelas: "status-mendekati" };
+            return { teks: "Aman", kelas: "status-aman" };
+        }
+
+        document.getElementById("formTambahData").addEventListener("submit", function(event) {
+            event.preventDefault(); 
+            if (currentRole !== "admin") return;
+
+            const kategori = document.getElementById("inputKategori").value;
+            const merek = document.getElementById("inputMerek").value;
+            const plat = document.getElementById("inputPlat").value;
+            const tanggalInput = document.getElementById("inputTanggal").value;
+            const pembawa = document.getElementById("inputPembawa").value;
+            const keadaan = document.getElementById("inputKeadaan").value;
+
+            const tanggalFormatted = formatTanggal(tanggalInput);
+            const statusData = hitungStatus(tanggalInput);
+
+            const barisBaru = `
+                <tr>
+                    <td class="col-merek">${merek}</td>
+                    <td class="col-plat">${plat.toUpperCase()}</td>
+                    <td class="col-tanggal" data-rawdate="${tanggalInput}">${tanggalFormatted}</td>
+                    <td class="col-pembawa">${pembawa}</td>
+                    <td class="col-keadaan">${keadaan}</td>
+                    <td class="col-status"><span class="badge ${statusData.kelas}">${statusData.teks}</span></td>
+                    <td class="td-aksi"><button class="btn-edit" onclick="bukaModalEdit(this)">Edit</button></td>
+                </tr>
+            `;
+
+            if (kategori === "Motor") {
+                document.querySelector("#tabelMotor tbody").insertAdjacentHTML('beforeend', barisBaru);
+            } else if (kategori === "Mobil") {
+                document.querySelector("#tabelMobil tbody").insertAdjacentHTML('beforeend', barisBaru);
+            }
+
+            this.reset();
+            openTab(null, kategori);
+        });
+
+        let barisYangDiedit = null;
+
+        function bukaModalEdit(tombol) {
+            if (currentRole !== "admin") return;
+            barisYangDiedit = tombol.closest("tr");
+
+            const platSekarang = barisYangDiedit.querySelector(".col-plat").innerText;
+            const tanggalSekarang = barisYangDiedit.querySelector(".col-tanggal").getAttribute("data-rawdate");
+            const pembawaSekarang = barisYangDiedit.querySelector(".col-pembawa").innerText;
+            const keadaanSekarang = barisYangDiedit.querySelector(".col-keadaan").innerText;
+
+            document.getElementById("editPlat").value = platSekarang;
+            document.getElementById("editTanggal").value = tanggalSekarang;
+            document.getElementById("editPembawa").value = pembawaSekarang;
+            document.getElementById("editKeadaan").value = keadaanSekarang;
+
+            document.getElementById("modalEdit").style.display = "block";
+        }
+
+        function tutupModalEdit() {
+            document.getElementById("modalEdit").style.display = "none";
+            barisYangDiedit = null; 
+        }
+
+        document.getElementById("formEditData").addEventListener("submit", function(event) {
+            event.preventDefault();
+            if (currentRole !== "admin") return;
+
+            if (barisYangDiedit !== null) {
+                const platBaru = document.getElementById("editPlat").value.toUpperCase();
+                const tanggalBaruRaw = document.getElementById("editTanggal").value;
+                const pembawaBaru = document.getElementById("editPembawa").value;
+                const keadaanBaru = document.getElementById("editKeadaan").value;
+
+                const tanggalBaruFormatted = formatTanggal(tanggalBaruRaw);
+                const statusBaru = hitungStatus(tanggalBaruRaw);
+
+                barisYangDiedit.querySelector(".col-plat").innerText = platBaru;
+                
+                const elemenTanggal = barisYangDiedit.querySelector(".col-tanggal");
+                elemenTanggal.innerText = tanggalBaruFormatted;
+                elemenTanggal.setAttribute("data-rawdate", tanggalBaruRaw);
+                
+                barisYangDiedit.querySelector(".col-pembawa").innerText = pembawaBaru;
+                barisYangDiedit.querySelector(".col-keadaan").innerText = keadaanBaru;
+                
+                barisYangDiedit.querySelector(".col-status").innerHTML = `<span class="badge ${statusBaru.kelas}">${statusBaru.teks}</span>`;
+
+                tutupModalEdit();
+            }
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("modalEdit");
+            if (event.target == modal) {
+                tutupModalEdit();
+            }
+        }
+    </script>
+</body>
+</html>
